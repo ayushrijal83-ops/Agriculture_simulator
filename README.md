@@ -267,7 +267,7 @@ I am passionate about building intelligent applications that solve real-world pr
 
 GitHub: https://github.com/ayushrijal83-ops
 
-LinkedIn: (Add your LinkedIn profile here.)
+LinkedIn: https://www.linkedin.com/in/ayush-rijal-429516410?utm_source=share_via&utm_content=profile&utm_medium=member_android
 
 ---
 
