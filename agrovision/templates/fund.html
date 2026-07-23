@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% set title = "AgroVision Nepal | Fund Hub" %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+  <div>
+    <h2 class="fw-bold mb-0">Agri Fund Hub</h2>
+    <div class="text-muted small">
+      Farmers can apply for funding and supporters can contribute to campaigns.
+    </div>
+  </div>
+
+  <a class="btn btn-outline-light btn-sm" href="{{ url_for('dashboard') }}">← Dashboard</a>
+</div>
+
+<!-- Create Campaign -->
+<div class="card card-agro shadow-sm mb-4">
+  <div class="card-body">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <div class="icon-badge">💰</div>
+      <div>
+        <div class="fw-bold">Create a Fund Campaign</div>
+        <div class="text-muted small">Farmers can submit a plan and raise support.</div>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('create_fund') }}">
+      <div class="row g-2">
+
+        <div class="col-md-6">
+          <label class="form-label small">Campaign Title</label>
+          <input class="form-control" name="title" placeholder="e.g., Greenhouse Tomato Expansion" required>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label small">Target Amount (Rs.)</label>
+          <input class="form-control" name="target_amount" type="number" min="1" step="0.01" required>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label small">Duration (days)</label>
+          <input class="form-control" name="duration_days" type="number" min="1" max="365" required>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label small">Description</label>
+          <textarea class="form-control" name="description" rows="3"
+                    placeholder="Explain what you will do, budget plan, and expected impact." required></textarea>
+        </div>
+
+        <div class="col-12 d-grid mt-2">
+          <button class="btn btn-success">Submit Campaign</button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Campaign List -->
+<div class="d-flex align-items-center justify-content-between mb-2">
+  <h5 class="fw-bold mb-0">Live Campaigns</h5>
+  <div class="text-muted small">Investors can contribute instantly (demo simulation).</div>
+</div>
+
+{% if not campaigns %}
+  <div class="text-muted">No campaigns yet. Create the first one above.</div>
+{% endif %}
+
+{% for c in campaigns %}
+  {% set target = (c.target_amount or 0) %}
+  {% set raised = (c.raised_amount or 0) %}
+  {% set pct = ((raised / target) * 100) if target > 0 else 0 %}
+
+  {% set trust = c.trust_label if c.trust_label else "Unknown" %}
+  {% if trust == "High Trust" %}
+    {% set trust_color = "success" %}
+  {% elif trust == "Moderate Risk" %}
+    {% set trust_color = "warning" %}
+  {% else %}
+    {% set trust_color = "danger" %}
+  {% endif %}
+
+  <div class="card card-agro shadow-sm mb-3">
+    <div class="card-body">
+
+      <div class="d-flex align-items-start justify-content-between gap-2">
+        <div>
+          <div class="fw-bold">{{ c.title }}</div>
+          <div class="text-muted small">
+            Duration: {{ c.duration_days }} days
+            {% if c.risk_score is not none %}
+              • Risk Score: <span class="text-light fw-semibold">{{ c.risk_score }}</span>/100
+            {% endif %}
+          </div>
+        </div>
+
+        <span class="badge text-bg-{{ trust_color }}">{{ trust }}</span>
+      </div>
+
+      <div class="text-muted small mt-2">
+        {{ c.description }}
+      </div>
+
+      <div class="mt-3">
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar bg-success" style="width: {{ pct|round(0) ~ '%' }};"></div>
+        </div>
+
+        <div class="small text-muted mt-1">
+          Raised Rs. {{ raised }} of Rs. {{ target }} ({{ pct|round(0) }}%)
+        </div>
+      </div>
+
+      <!-- Invest -->
+      <form class="mt-3" method="POST" action="{{ url_for('invest', campaign_id=c.id) }}">
+        <label class="form-label small mb-1">Contribute to this campaign</label>
+        <div class="input-group input-group-sm">
+          <input class="form-control"
+                 type="number"
+                 min="1"
+                 step="0.01"
+                 name="amount"
+                 placeholder="Amount (Rs.)"
+                 required>
+          <button class="btn btn-success" type="submit">Invest</button>
+        </div>
+        <div class="text-muted small mt-1">
+          Tip: Try a description like “guaranteed 100% profit” to see risk detection.
+        </div>
+      </form>
+
+    </div>
+  </div>
+{% endfor %}
+
+{% endblock %}
